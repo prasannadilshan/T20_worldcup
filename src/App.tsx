@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import videojs from 'video.js';
 import VideoPlayer from './components/VideoPlayer';
 import { Tv, Info } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
       <footer className="app-footer">
         <p>&copy; 2026 LiveStreamPro. All rights reserved.</p>
       </footer>
+      <Analytics />
     </div>
   );
 }
