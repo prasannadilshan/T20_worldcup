@@ -15,7 +15,8 @@ function App() {
     fluid: true,
     html5: {
       vhs: {
-        // overrideNative: true // Commented out to allow native HLS on mobile
+        overrideNative: true,
+        enableLowInitialPlaylist: true
       },
       nativeAudioTracks: false,
       nativeVideoTracks: false
@@ -28,6 +29,13 @@ function App() {
 
   const handlePlayerReady = (player: any) => {
     playerRef.current = player;
+
+    // Handle player errors
+    player.on('error', () => {
+      const error = player.error();
+      console.error('Video Player Error:', error);
+      // You could update state here to show a user-friendly message
+    });
 
     // You can handle player events here, for example:
     player.on('waiting', () => {
