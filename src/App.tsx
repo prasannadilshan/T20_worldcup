@@ -1,12 +1,13 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import videojs from 'video.js';
 import VideoPlayer from './components/VideoPlayer';
 import { Tv, Info } from 'lucide-react';
 import { Analytics } from '@vercel/analytics/react';
+import { getStreamUrl } from './services/streamService';
 import './App.css';
 
 function App() {
-  const playerRef = useRef(null);
+  const playerRef = useRef<any>(null);
 
   const videoJsOptions = {
     autoplay: true,
@@ -26,11 +27,26 @@ function App() {
     },
     // Add timeouts to prevent premature errors on slow mobile networks
     inactivityTimeout: 0,
-    sources: [{
-      src: 'https://002.fclplayer.net/live/csstream2/playlist.m3u8?id=1002&pk=3bad08820212278e4f2cc060e2dc8858a276d1230c616f85d1ea77ea8738bc70',
-      type: 'application/x-mpegURL'
-    }]
+    sources: [] // Sources will be set dynamically
   };
+
+  useEffect(() => {
+    const fetchStream = async () => {
+      try {
+        const url = await getStreamUrl();
+        if (playerRef.current) {
+          playerRef.current.src({
+            src: url,
+            type: 'application/x-mpegURL'
+          });
+        }
+      } catch (error) {
+        console.error('Error setting up stream:', error);
+      }
+    };
+
+    fetchStream();
+  }, []);
 
   const handlePlayerReady = (player: any) => {
     playerRef.current = player;
@@ -42,14 +58,20 @@ function App() {
       
       // Auto-retry after 3 seconds if it's a network error
       if (error && (error.code === 2 || error.code === 4)) {
-        setTimeout(() => {
+        setTimeout(async () => {
           console.log('Attempting to reload stream...');
-          player.src({
-            src: 'https://002.fclplayer.net/live/csstream2/playlist.m3u8?id=1002&pk=3bad08820212278e4f2cc060e2dc8858a276d1230c616f85d1ea77ea8738bc70',
-            type: 'application/x-mpegURL'
-          });
-          player.load();
-          player.play();
+          try {
+            // Re-fetch a FRESH URL on error (this fixes token expiration)
+            const newUrl = await getStreamUrl();
+            player.src({
+              src: newUrl,
+              type: 'application/x-mpegURL'
+            });
+            player.load();
+            player.play();
+          } catch (e) {
+            console.error('Retry failed:', e);
+          }
         }, 3000);
       }
     });
