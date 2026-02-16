@@ -14,7 +14,7 @@ function App() {
     fluid: true,
     html5: {
       vhs: {
-        overrideNative: true
+        // overrideNative: true // Commented out to allow native HLS on mobile
       },
       nativeAudioTracks: false,
       nativeVideoTracks: false

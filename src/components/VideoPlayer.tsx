@@ -19,6 +19,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = (props) => {
       const videoElement = document.createElement("video-js");
 
       videoElement.classList.add('vjs-big-play-centered');
+      videoElement.setAttribute('playsinline', 'true');
       
       if (videoRef.current) {
          videoRef.current.appendChild(videoElement);
