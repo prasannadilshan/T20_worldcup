@@ -16,11 +16,16 @@ function App() {
     html5: {
       vhs: {
         overrideNative: true,
-        enableLowInitialPlaylist: true
+        enableLowInitialPlaylist: true,
+        // Increase timeout for mobile networks
+        limitRenditionByPlayerDimensions: false,
+        smoothQualityChange: true
       },
       nativeAudioTracks: false,
       nativeVideoTracks: false
     },
+    // Add timeouts to prevent premature errors on slow mobile networks
+    inactivityTimeout: 0,
     sources: [{
       src: 'https://002.fclplayer.net/live/csstream2/playlist.m3u8?id=1002&pk=3bad08820212278e4f2cc060e2dc8858a276d1230c616f85d1ea77ea8738bc70',
       type: 'application/x-mpegURL'
@@ -30,11 +35,23 @@ function App() {
   const handlePlayerReady = (player: any) => {
     playerRef.current = player;
 
-    // Handle player errors
+    // Enhanced Error Handling & Retry Logic
     player.on('error', () => {
       const error = player.error();
       console.error('Video Player Error:', error);
-      // You could update state here to show a user-friendly message
+      
+      // Auto-retry after 3 seconds if it's a network error
+      if (error && (error.code === 2 || error.code === 4)) {
+        setTimeout(() => {
+          console.log('Attempting to reload stream...');
+          player.src({
+            src: 'https://002.fclplayer.net/live/csstream2/playlist.m3u8?id=1002&pk=3bad08820212278e4f2cc060e2dc8858a276d1230c616f85d1ea77ea8738bc70',
+            type: 'application/x-mpegURL'
+          });
+          player.load();
+          player.play();
+        }, 3000);
+      }
     });
 
     // You can handle player events here, for example:
