@@ -5,13 +5,17 @@ export const getStreamUrl = async (): Promise<string> => {
     // const data = await response.json();
     // return data.url;
 
-    // For now, we return the hardcoded URL, but this architecture 
-    // allows you to swap it for a dynamic one easily.
+    // Connect to local backend proxy
+    // Dynamically determine the backend URL based on the frontend's hostname
+    // This allows it to work when accessed via IP address (e.g. 192.168.x.x) on mobile
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    const backendUrl = `${protocol}//${hostname}:5000/stream/playlist.m3u8`;
     
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 100));
     
-    return 'https://002.fclplayer.net/live/csstream2/playlist.m3u8?id=1002&pk=3bad08820212278e4f2cc060e2dc8858a276d1230c616f85d1ea77ea8738bc70';
+    return backendUrl;
   } catch (error) {
     console.error('Failed to fetch stream URL:', error);
     throw error;
